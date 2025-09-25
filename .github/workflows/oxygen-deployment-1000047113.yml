@@ -1,0 +1,64 @@
+name: Storefront 1000047113
+on: [push]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    name: Deploy to Oxygen
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          check-latest: true
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Clear npm cache and config
+        run: |
+          npm cache clean --force
+          rm -rf ~/.npm
+          rm -f .npmrc
+          rm -f ~/.npmrc
+          rm -rf node_modules
+          rm -f package-lock.json
+
+      - name: Configure npm registry
+        run: |
+          npm config set registry https://registry.npmjs.org/ --global
+          npm config set //registry.npmjs.org/:_authToken "" --global
+          npm config set @shopify:registry https://registry.npmjs.org/ --global
+          npm config set //npm.shopify.io/:_authToken "" --global
+          # Create .npmrc file to ensure scoped registry config
+          echo "@shopify:registry=https://registry.npmjs.org/" > .npmrc
+          echo "registry=https://registry.npmjs.org/" >> .npmrc
+          npm config list
+
+      - name: Debug npm configuration
+        run: |
+          echo "NPM Registry: $(npm config get registry)"
+          echo "NPM Auth Token: $(npm config get //registry.npmjs.org/:_authToken)"
+          echo "NPM User Config: $(npm config get userconfig)"
+          echo "NPM Global Config: $(npm config get globalconfig)"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --verbose
+
+      - name: Build and Publish to Oxygen
+        run: npx shopify hydrogen deploy
+        env:
+          SHOPIFY_HYDROGEN_DEPLOYMENT_TOKEN: ${{ secrets.OXYGEN_DEPLOYMENT_TOKEN_1000047113 }}
