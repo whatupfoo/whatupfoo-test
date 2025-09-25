@@ -42,6 +42,9 @@ jobs:
           npm config set //registry.npmjs.org/:_authToken "" --global
           npm config set @shopify:registry https://registry.npmjs.org/ --global
           npm config set //npm.shopify.io/:_authToken "" --global
+          # Create .npmrc file to ensure scoped registry config
+          echo "@shopify:registry=https://registry.npmjs.org/" > .npmrc
+          echo "registry=https://registry.npmjs.org/" >> .npmrc
           npm config list
 
       - name: Debug npm configuration
