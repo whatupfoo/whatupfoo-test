@@ -34,14 +34,23 @@ jobs:
           rm -rf ~/.npm
           rm -f .npmrc
           rm -f ~/.npmrc
+          rm -rf node_modules
 
       - name: Configure npm registry
         run: |
           npm config set registry https://registry.npmjs.org/ --global
           npm config set //registry.npmjs.org/:_authToken "" --global
+          npm config list
+
+      - name: Debug npm configuration
+        run: |
+          echo "NPM Registry: $(npm config get registry)"
+          echo "NPM Auth Token: $(npm config get //registry.npmjs.org/:_authToken)"
+          echo "NPM User Config: $(npm config get userconfig)"
+          echo "NPM Global Config: $(npm config get globalconfig)"
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: npm install --no-audit --no-fund --verbose
 
       - name: Build and Publish to Oxygen
         run: npx shopify hydrogen deploy
