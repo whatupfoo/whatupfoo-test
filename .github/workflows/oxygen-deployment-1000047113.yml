@@ -28,11 +28,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Clear npm cache
-        run: npm cache clean --force
+      - name: Clear npm cache and config
+        run: |
+          npm cache clean --force
+          rm -rf ~/.npm
+          rm -f .npmrc
+          rm -f ~/.npmrc
+
+      - name: Configure npm registry
+        run: |
+          npm config set registry https://registry.npmjs.org/ --global
+          npm config set //registry.npmjs.org/:_authToken "" --global
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Build and Publish to Oxygen
         run: npx shopify hydrogen deploy
