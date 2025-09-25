@@ -40,6 +40,8 @@ jobs:
         run: |
           npm config set registry https://registry.npmjs.org/ --global
           npm config set //registry.npmjs.org/:_authToken "" --global
+          npm config set @shopify:registry https://registry.npmjs.org/ --global
+          npm config set //npm.shopify.io/:_authToken "" --global
           npm config list
 
       - name: Debug npm configuration
